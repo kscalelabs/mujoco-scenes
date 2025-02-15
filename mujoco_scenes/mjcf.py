@@ -115,7 +115,7 @@ def _find_assets(
     fname = elem.attrib.get("file") or elem.attrib.get("filename")
 
     if fname is not None:
-        if (fname.lower().endswith(".xml") or fname.lower().endswith(".mjcf")):
+        if fname.lower().endswith(".xml") or fname.lower().endswith(".mjcf"):
             pass
         else:
             path_local = path / meshdir if meshdir else path
