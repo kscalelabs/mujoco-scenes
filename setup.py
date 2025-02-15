@@ -14,6 +14,11 @@ requirements = [
     "numpy",
 ]
 
+requirements_brax = [
+    "brax",
+    "jax",
+]
+
 requirements_dev = [
     "black",
     "darglint",
@@ -38,7 +43,11 @@ setup(
     long_description_content_type="text/markdown",
     python_requires=">=3.11",
     install_requires=requirements,
-    extras_require={"dev": requirements_dev},
+    extras_require={
+        "dev": requirements_dev,
+        "brax": requirements_brax,
+        "all": requirements + requirements_brax,
+    },
     packages=find_packages(),
     entry_points={
         "console_scripts": [
