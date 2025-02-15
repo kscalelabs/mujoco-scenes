@@ -9,14 +9,18 @@ from setuptools import find_packages, setup
 with open("README.md", "r", encoding="utf-8") as f:
     long_description: str = f.read()
 
+requirements = [
+    "mujoco",
+    "numpy",
+]
 
-with open("mujoco_scenes/requirements.txt", "r", encoding="utf-8") as f:
-    requirements: list[str] = f.read().splitlines()
-
-
-with open("mujoco_scenes/requirements-dev.txt", "r", encoding="utf-8") as f:
-    requirements_dev: list[str] = f.read().splitlines()
-
+requirements_dev = [
+    "black",
+    "darglint",
+    "mypy",
+    "pytest",
+    "ruff",
+]
 
 with open("mujoco_scenes/__init__.py", "r", encoding="utf-8") as fh:
     version_re = re.search(r"^__version__ = \"([^\"]*)\"", fh.read(), re.MULTILINE)
@@ -36,9 +40,9 @@ setup(
     install_requires=requirements,
     extras_require={"dev": requirements_dev},
     packages=find_packages(),
-    # entry_points={
-    #     "console_scripts": [
-    #         "mujoco_scenes.cli:main",
-    #     ],
-    # },
+    entry_points={
+        "console_scripts": [
+            "mujoco-scene = mujoco_scenes.cli:main",
+        ],
+    },
 )
