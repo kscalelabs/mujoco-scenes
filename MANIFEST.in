@@ -1,0 +1,1 @@
+recursive-include mujoco_scenes/ *.py *.txt py.typed MANIFEST.in
