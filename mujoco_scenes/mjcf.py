@@ -114,18 +114,12 @@ def _find_assets(
     path = path if path.is_dir() else path.parent
     fname = elem.attrib.get("file") or elem.attrib.get("filename")
 
-    if fname and fname.endswith(".xml"):
-        # When the asset is another XML file, traverse it to extract assets.
-        asset = (path / fname).read_text()
-        asset_xml = ET.fromstring(asset)
-        _fuse_bodies(asset_xml)
-        asset_meshdir = _get_meshdir(asset_xml)
-        assets[fname] = ET.tostring(asset_xml)
-        assets.update(_find_assets(asset_xml, path, asset_meshdir))
-    elif fname:
-        # For mesh files, images, etc.
-        path_local = path / meshdir if meshdir else path
-        assets[fname] = (path_local / fname).read_bytes()
+    if fname is not None:
+        if (fname.lower().endswith(".xml") or fname.lower().endswith(".mjcf")):
+            pass
+        else:
+            path_local = path / meshdir if meshdir else path
+            assets[fname] = (path_local / fname).read_bytes()
 
     for child in list(elem):
         assets.update(_find_assets(child, path, meshdir))
