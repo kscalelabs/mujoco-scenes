@@ -221,8 +221,10 @@ def load_mjmodel(path: str | epath.Path, scene: str | None = None) -> mujoco.MjM
     if scene is not None:
         scene_path = get_scene(scene)
         scene_text = scene_path.read_text()
-        if (robot_name := re.search(r"<mujoco model=\"(.*)\"", xml).group(1)) is None:
+        if (robot_match := re.search(r"<mujoco model=\"(.*)\"", xml)) is None:
             robot_name = "robot"
+        else:
+            robot_name = robot_match.group(1)
         scene_text = scene_text.format(name=robot_name, path=path)
         scene_elem = ET.fromstring(scene_text)
         assets.update(_find_assets(scene_elem, scene_path, meshdir))

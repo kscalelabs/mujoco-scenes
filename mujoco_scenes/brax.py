@@ -107,7 +107,7 @@ def _get_custom(mj: mujoco.MjModel) -> dict[str, np.ndarray]:
         size = {
             "body": mj.nbody - 1,  # ignore the world body
             "geom": mj.ngeom,
-        }.get(typ, val.shape[-1])
+        }.get(typ or "", val.shape[-1])
         if val.shape[-1] != size and val.shape[-1] > 1:
             # the provided shape does not match against our default size
             raise ValueError(
