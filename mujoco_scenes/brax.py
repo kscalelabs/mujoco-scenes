@@ -111,7 +111,7 @@ def _get_custom(mj: mujoco.MjModel) -> dict[str, np.ndarray]:
         if val.shape[-1] != size and val.shape[-1] > 1:
             # the provided shape does not match against our default size
             raise ValueError(
-                f'"{name}" custom arg needed {size} values for the "{typ}" type, ' f"but got {val.shape[-1]} values."
+                f'"{name}" custom arg needed {size} values for the "{typ}" type, but got {val.shape[-1]} values.'
             )
         elif val.shape[-1] != size and val.shape[-1] == 1:
             val = np.repeat(val, size)
@@ -132,9 +132,7 @@ def _get_custom(mj: mujoco.MjModel) -> dict[str, np.ndarray]:
             raise NotImplementedError(f'Custom tuple "{name}" with objtype=={objtype[0]} is not supported.')
         typ = {1: "body", 5: "geom"}[objtype[0]]
         if name in default and default[name][1] != typ:
-            raise ValueError(
-                f'Custom tuple "{name}" is expected to be associated with' f" the {default[name][1]} objtype."
-            )
+            raise ValueError(f'Custom tuple "{name}" is expected to be associated with the {default[name][1]} objtype.')
 
         size = {1: mj.nbody, 5: mj.ngeom}[objtype[0]]
         default_val, _ = default.get(name, (0.0, None))
