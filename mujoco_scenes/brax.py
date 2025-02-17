@@ -171,11 +171,12 @@ def load_model(mj: mujoco.MjModel) -> System:
         constraint_limit_stiffness=custom["constraint_limit_stiffness"],
         constraint_ang_damping=custom["constraint_ang_damping"],
     )
-    # skip link 0 which is the world body in mujoco
-    # copy to avoid writing to mj model
+
+    # Skip link 0 which is the world body in MuJoCo.
+    # Copy to avoid writing to MuJoCo model.
     link = jax.tree.map(lambda x: x[1:].copy(), link)
 
-    # create dofs
+    # Create DOFs.
     mj.jnt_range[~(mj.jnt_limited == 1), :] = np.array([-np.inf, np.inf])
     motions, limits, stiffnesses = [], [], []
     for typ, axis, limit, stiffness in zip(mj.jnt_type, mj.jnt_axis, mj.jnt_range, mj.jnt_stiffness):
@@ -196,7 +197,7 @@ def load_model(mj: mujoco.MjModel) -> System:
             limit = limit[0:1], limit[1:2]
             stiffness = np.array([stiffness])
         else:
-            # invalid joint type
+            # Invalid joint type
             continue
         motions.append(motion)
         limits.append(limit)
@@ -227,7 +228,8 @@ def load_model(mj: mujoco.MjModel) -> System:
     force_range[~(mj.actuator_forcelimited == 1), :] = np.array([-np.inf, np.inf])
     bias_q = mj.actuator_biasprm[:, 1] * (mj.actuator_biastype != 0)
     bias_qd = mj.actuator_biasprm[:, 2] * (mj.actuator_biastype != 0)
-    # mask actuators since brax only supports joint transmission types
+
+    # Mask actuators since Brax only supports joint transmission types.
     act_mask = mj.actuator_trntype == mujoco.mjtTrn.mjTRN_JOINT
     trnid = mj.actuator_trnid[act_mask, 0].astype(np.uint32)
     q_id = mj.jnt_qposadr[trnid]
@@ -244,29 +246,23 @@ def load_model(mj: mujoco.MjModel) -> System:
 
     actuator = Actuator(q_id=q_id, qd_id=qd_id, **act_kwargs)  # pytype: disable=wrong-arg-types
 
-    # create non-pytree params.  these do not live on device directly, and they
-    # cannot be differentiated, but they do change the emitted control flow
+    # Create non-pytree params. These do not live on device directly, and they
+    # cannot be differentiated, but they do change the emitted control flow.
     link_names = [_get_name(mj, i) for i in mj.name_bodyadr[1:]]
-    # convert stacked joints to 1, 2, or 3
+
+    # Convert stacked joints to 1, 2, or 3
     link_types = ""
     for _, group in itertools.groupby(zip(mj.jnt_bodyid, mj.jnt_type), key=lambda x: x[0]):
         typs = [t for _, t in group]
         if len(typs) == 1 and typs[0] == 0:  # free
             typ = "f"
         elif 0 in typs or 1 in typs:
-            # invalid joint stack
+            # Invalid joint stack
             continue
         else:
             typ = str(len(typs))
         link_types += typ
     link_parents = tuple(mj.body_parentid - 1)[1:]
-
-    # mujoco stores free q in world frame, so clear link transform for free links
-    # TODO: make this work for non-fused mj models
-    if "f" in link_types:
-        free_idx = np.array([i for i, typ in enumerate(link_types) if typ == "f"])
-        link.transform.pos[free_idx] = np.zeros(3)
-        link.transform.rot[free_idx] = np.array([1.0, 0.0, 0.0, 0.0])
 
     mjx_model = mjx.put_model(mj)
 
