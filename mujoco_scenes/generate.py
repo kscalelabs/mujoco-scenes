@@ -2,8 +2,6 @@
 """This script can be used to generate new grids."""
 
 import argparse
-import os
-import random
 
 import numpy as np
 from PIL import Image
