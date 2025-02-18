@@ -53,7 +53,7 @@ setup(
     extras_require={
         "dev": requirements_dev,
         "brax": requirements_brax,
-        "all": requirements + requirements_brax,
+        "all": requirements + requirements_dev + requirements_brax,
     },
     packages=find_packages(),
     include_package_data=True,
