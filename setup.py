@@ -28,6 +28,11 @@ requirements_dev = [
     "ruff",
 ]
 
+# Collects package data.
+package_data = ["mujoco_scenes/py.typed"]
+for ext in (".xml", ".png"):
+    package_data.extend(glob.glob(f"mujoco_scenes/**/*.{ext}", recursive=True))
+
 with open("mujoco_scenes/__init__.py", "r", encoding="utf-8") as fh:
     version_re = re.search(r"^__version__ = \"([^\"]*)\"", fh.read(), re.MULTILINE)
 assert version_re is not None, "Could not find version in mujoco_scenes/__init__.py"
