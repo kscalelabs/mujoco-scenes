@@ -80,26 +80,6 @@ def _offset(elem: ET.Element, parent_pos: np.ndarray, parent_quat: np.ndarray) -
     elem.attrib["quat"] = quat_str
 
 
-def _fuse_bodies(elem: ET.Element) -> None:
-    # Make a copy of children, as we will modify them.
-    for child in list(elem):
-        _fuse_bodies(child)
-        if child.tag != "body":
-            continue
-        if child.find("joint") is not None or child.find("freejoint") is not None:
-            continue
-        cpos = child.attrib.get("pos", "0 0 0")
-        cpos = np.fromstring(cpos, sep=" ")
-        cquat = child.attrib.get("quat", "1 0 0 0")
-        cquat = np.fromstring(cquat, sep=" ")
-        for grandchild in child:
-            if grandchild.tag in ("body", "geom", "site", "camera") and (cpos != 0).any():
-                _offset(grandchild, cpos, cquat)
-            # TODO: Consider offsetting additional tags if necessary.
-            elem.append(grandchild)
-        elem.remove(child)
-
-
 def _get_meshdir(elem: ET.Element) -> str | None:
     elems = list(elem.iter("compiler"))
     return elems[0].get("meshdir") if elems else None
@@ -197,15 +177,8 @@ def validate_model(mj: mujoco.MjModel) -> None:
                 raise NotImplementedError("Cylinders of half-length>0.001 are not supported for collision.")
 
 
-def fuse_bodies(xml: str) -> str:
-    xml_tree = ET.fromstring(xml)
-    _fuse_bodies(xml_tree)
-    return ET.tostring(xml_tree, encoding="unicode")
-
-
 def load_mjmodel(path: str | epath.Path, scene: str | None = None) -> mujoco.MjModel:
     elem = ET.fromstring(epath.Path(path).read_text())
-    _fuse_bodies(elem)
     meshdir = _get_meshdir(elem)
     assets = _find_assets(elem, epath.Path(path), meshdir)
     xml = ET.tostring(elem, encoding="unicode")
