@@ -2,6 +2,7 @@
 #!/usr/bin/env python
 """Setup script for the project."""
 
+import glob
 import re
 
 from setuptools import find_packages, setup
