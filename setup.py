@@ -56,6 +56,8 @@ setup(
         "all": requirements + requirements_brax,
     },
     packages=find_packages(),
+    include_package_data=True,
+    package_data={"mujoco_scenes": package_data},
     entry_points={
         "console_scripts": [
             "mujoco-scene = mujoco_scenes.cli:main",
