@@ -182,20 +182,21 @@ def load_mjmodel(path: str | epath.Path, scene: str | None = None) -> mujoco.MjM
     meshdir = _get_meshdir(elem)
     assets = _find_assets(elem, epath.Path(path), meshdir)
     xml = ET.tostring(elem, encoding="unicode")
-    mj = mujoco.MjModel.from_xml_string(xml, assets=assets)
+    
+    if scene is None:
+        mj = mujoco.MjModel.from_xml_string(xml, assets=assets)
+        return mj
 
-    # Loads the scene, if provided.
-    if scene is not None:
-        scene_path = get_scene(scene)
-        scene_text = scene_path.read_text()
-        if (robot_match := re.search(r"<mujoco model=\"(.*)\"", xml)) is None:
-            robot_name = "robot"
-        else:
-            robot_name = robot_match.group(1)
-        scene_text = scene_text.format(name=robot_name, path=path)
-        scene_elem = ET.fromstring(scene_text)
-        assets.update(_find_assets(scene_elem, scene_path, meshdir))
-        scene_xml = ET.tostring(scene_elem, encoding="unicode")
-        mj = mujoco.MjModel.from_xml_string(scene_xml, assets=assets)
-
+    scene_path = get_scene(scene)
+    scene_text = scene_path.read_text()
+    if (robot_match := re.search(r"<mujoco model=\"(.*)\"", xml)) is None:
+        robot_name = "robot"
+    else:
+        robot_name = robot_match.group(1)
+    scene_text = scene_text.format(name=robot_name, path=path)
+    scene_elem = ET.fromstring(scene_text)
+    assets.update(_find_assets(scene_elem, scene_path, meshdir))
+    scene_xml = ET.tostring(scene_elem, encoding="unicode")
+    mj = mujoco.MjModel.from_xml_string(scene_xml, assets=assets)
+    
     return mj
