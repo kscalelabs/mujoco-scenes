@@ -182,7 +182,7 @@ def load_mjmodel(path: str | epath.Path, scene: str | None = None) -> mujoco.MjM
     meshdir = _get_meshdir(elem)
     assets = _find_assets(elem, epath.Path(path), meshdir)
     xml = ET.tostring(elem, encoding="unicode")
-    
+
     if scene is None:
         mj = mujoco.MjModel.from_xml_string(xml, assets=assets)
         return mj
@@ -198,5 +198,5 @@ def load_mjmodel(path: str | epath.Path, scene: str | None = None) -> mujoco.MjM
     assets.update(_find_assets(scene_elem, scene_path, meshdir))
     scene_xml = ET.tostring(scene_elem, encoding="unicode")
     mj = mujoco.MjModel.from_xml_string(scene_xml, assets=assets)
-    
+
     return mj
