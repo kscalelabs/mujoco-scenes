@@ -16,6 +16,6 @@
   </asset>
 
   <worldbody>
-    <geom name="floor" type="hfield" hfield="hfield" contype="1" conaffinity="0" priority="1" friction="1 0.005 0.0001" pos="0 0 -0.1" />
+    <geom name="floor" type="hfield" hfield="hfield" contype="1" conaffinity="1" priority="1" friction="1 0.005 0.0001" pos="0 0 -0.1" />
   </worldbody>
 </mujoco>
