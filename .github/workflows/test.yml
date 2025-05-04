@@ -44,7 +44,7 @@ jobs:
 
       - name: Install package
         run: |
-          pip install --upgrade --upgrade-strategy eager -e '.[all]'
+          pip install --upgrade --upgrade-strategy eager -e '.[dev]'
 
       - name: Run static checks
         run: |
