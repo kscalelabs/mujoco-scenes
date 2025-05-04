@@ -14,6 +14,7 @@ requirements = [
     "etils",
     "mujoco",
     "numpy",
+    "Pillow",
 ]
 
 requirements_dev = [
