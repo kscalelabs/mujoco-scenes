@@ -36,6 +36,7 @@
       texuniform="true"
       texrepeat="5 5"
       reflectance="0.2"
+      rgba="1 1 1 0.3"
     />
   </asset>
 
