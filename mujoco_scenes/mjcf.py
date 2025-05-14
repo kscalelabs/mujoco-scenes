@@ -8,17 +8,19 @@ import mujoco
 import numpy as np
 from etils import epath
 
+from mujoco_scenes.errors import ModelValidationError, TemplateDirectoryNotFoundError, TemplateNotFoundError
+
 
 def get_template_dir() -> epath.Path:
     if not (template_dir := epath.Path(__file__).parent / "templates").exists():
-        raise RuntimeError("Template directory not found.")
+        raise TemplateDirectoryNotFoundError()
     return template_dir.resolve()
 
 
 def get_scene(name: str) -> epath.Path:
     scene_path = get_template_dir() / f"{name}.xml"
     if not scene_path.exists():
-        raise RuntimeError(f"Template {name} not found.")
+        raise TemplateNotFoundError(name)
     return scene_path
 
 
@@ -142,7 +144,7 @@ def validate_model(mj: mujoco.MjModel) -> None:
     for _, group in itertools.groupby(zip(mj.jnt_bodyid, mj.jnt_pos), key=lambda x: x[0]):
         position = np.array([p for _, p in group])
         if not (position == position[0]).all():
-            raise RuntimeError("invalid joint stack: only one joint position allowed")
+            raise ModelValidationError("invalid joint stack: only one joint position allowed")
 
     # check dofs
     jnt_range = mj.jnt_range.copy()
@@ -150,21 +152,21 @@ def validate_model(mj: mujoco.MjModel) -> None:
     for typ, limit, stiffness in zip(mj.jnt_type, jnt_range, mj.jnt_stiffness):
         if typ == 0:
             if stiffness > 0:
-                raise RuntimeError("brax does not support stiffness for free joints")
+                raise ModelValidationError("brax does not support stiffness for free joints")
         elif typ == 1:
             if np.any(~np.isinf(limit)):
-                raise RuntimeError("brax does not support joint ranges for ball joints")
+                raise ModelValidationError("brax does not support joint ranges for ball joints")
         elif typ in (2, 3):
             continue
         else:
-            raise RuntimeError(f"invalid joint type: {typ}")
+            raise ModelValidationError(f"invalid joint type: {typ}")
 
     for _, group in itertools.groupby(zip(mj.jnt_bodyid, mj.jnt_type), key=lambda x: x[0]):
         typs = [t for _, t in group]
         if len(typs) == 1 and typs[0] == 0:
             continue  # free joint configuration
         elif 0 in typs:
-            raise RuntimeError("invalid joint stack: cannot stack free joints")
+            raise ModelValidationError("invalid joint stack: cannot stack free joints")
         elif 1 in typs:
             raise NotImplementedError("ball joints not supported")
 
