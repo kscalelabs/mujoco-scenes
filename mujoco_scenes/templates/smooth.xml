@@ -21,7 +21,7 @@
     />
 
     <texture
-      name="groundplane" 
+      name="groundplane"
       type="2d"
       builtin="checker"
       mark="edge"
@@ -41,16 +41,38 @@
       reflectance="0.1"
       rgba="1 1 1 1"
     />
-
   </asset>
 
   <worldbody>
-  <light name="sun"
-       pos="3 3 5"
-       dir="-0.6 -0.6 -1"
-       directional="true"
-       castshadow="true"
-       diffuse="0.3 0.3 0.3"/>
+    <light
+      name="sun"
+      pos="3 3 5"
+      dir="-0.6 -0.6 -1"
+      directional="true"
+      castshadow="true"
+      diffuse="0.3 0.3 0.3"
+    />
+
+    <light
+      name="spotlight1"
+      mode="targetbodycom"
+      target="base"
+      diffuse="0.5 0.5 0.5"
+      specular="0.3 0.3 0.3"
+      pos="0 -20 4"
+      cutoff="10"
+    />
+
+    <light
+      name="spotlight2"
+      mode="targetbodycom"
+      target="base"
+      diffuse="0.5 0.5 0.5"
+      specular="0.3 0.3 0.3"
+      pos="20 0 4"
+      cutoff="10"
+    />
+
     <geom
       name="floor"
       size="0 0 0.05"
@@ -61,4 +83,3 @@
     />
   </worldbody>
 </mujoco>
-  
