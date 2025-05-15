@@ -59,7 +59,7 @@
       target="base"
       diffuse="0.5 0.5 0.5"
       specular="0.3 0.3 0.3"
-      pos="0 -20 4"
+      pos="0 -10 4"
       cutoff="10"
     />
 
@@ -69,7 +69,7 @@
       target="base"
       diffuse="0.5 0.5 0.5"
       specular="0.3 0.3 0.3"
-      pos="20 0 4"
+      pos="10 0 4"
       cutoff="10"
     />
 
