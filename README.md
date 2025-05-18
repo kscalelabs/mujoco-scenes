@@ -2,6 +2,8 @@
 
 This package contains a collection of utility functions for generating different types of scenes in Mujoco.
 
+This is a programmatic way to compose scene files, inspired by [Mujoco Menagerie](https://github.com/google-deepmind/mujoco_menagerie).
+
 ## Usage
 
 To load a robot into a particular scene, you can use the following code:
