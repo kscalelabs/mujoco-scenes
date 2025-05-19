@@ -12,7 +12,7 @@
   </visual>
 
   <asset>
-    <hfield name="hfield" file="assets/steps_hfield.png" size="10 10 0.3 0.1" />
+    <hfield name="hfield" file="assets/steps_hfield.png" size="100 100 0.3 0.1" />
   </asset>
 
   <worldbody>
