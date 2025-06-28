@@ -7,40 +7,43 @@ import numpy as np
 from PIL import Image
 
 
-def generate_patch_texture(patch_type: str, size: int) -> Image.Image:
-    match patch_type:
-        case "rough":
-            # Rough: random noise.
-            arr = (np.random.rand(size, size, 3) - 0.5) * 0.03 + 0.5
-
-        case "smooth":
-            # Smooth: uniform gray texture (constant value).
-            arr = np.ones((size, size, 3)) * 0.5
-
-        case "hill":
-            # Hill: pyramid shape that rises from 0.5 at edges to 1.0 at center
-            x = np.linspace(-1, 1, size)
-            y = np.linspace(-1, 1, size)
-            xs, ys = np.meshgrid(x, y)
-            # Create pyramid using manhattan distance
-            r = np.maximum(np.abs(xs), np.abs(ys))
-            # Scale from 0.5 to 1.0
-            intensity = np.clip(1.0 - r, 0, 1) * 0.5 + 0.5
-            arr = np.stack([intensity] * 3, axis=-1)
-
-        case "valley":
-            # Valley: pyramid shape that drops from 0.5 at edges to 0.0 at center
-            x = np.linspace(-1, 1, size)
-            y = np.linspace(-1, 1, size)
-            xs, ys = np.meshgrid(x, y)
-            # Create pyramid using manhattan distance
-            r = np.maximum(np.abs(xs), np.abs(ys))
-            # Scale from 0.5 to 0.0
-            intensity = np.clip(r, 0, 1) * 0.5
-            arr = np.stack([intensity] * 3, axis=-1)
-
-        case _:
-            raise ValueError(f"Invalid patch type: {patch_type}")
+def generate_patch_texture(patch_type: str, size: int, col_idx: int = 0, amplitude: float = 1.0) -> Image.Image:
+    if patch_type == "hill-valley":
+        # Alternate between hill and valley based on column index
+        patch_type = "hill" if col_idx % 2 == 0 else "valley"
+    
+    if patch_type == "rough":
+        # Rough: random noise.
+        arr = (np.random.rand(size, size, 3) - 0.5) * 0.03 * amplitude + 0.5
+    elif patch_type == "smooth":
+        # Smooth: uniform gray texture (constant value).
+        arr = np.ones((size, size, 3)) * 0.5
+    elif patch_type == "hill":
+        # Hill: pyramid shape that rises from 0.5 at edges to peak at center
+        x = np.linspace(-1, 1, size)
+        y = np.linspace(-1, 1, size)
+        xs, ys = np.meshgrid(x, y)
+        # Create pyramid using manhattan distance
+        r = np.maximum(np.abs(xs), np.abs(ys))
+        # Scale from 0.5 to peak (controlled by amplitude)
+        base = 0.5
+        peak_offset = 0.5 * amplitude
+        intensity = base + np.clip(peak_offset * (1.0 - r), 0, 1)
+        arr = np.stack([intensity] * 3, axis=-1)
+    elif patch_type == "valley":
+        # Valley: pyramid shape that drops from 0.5 at edges to bottom at center
+        x = np.linspace(-1, 1, size)
+        y = np.linspace(-1, 1, size)
+        xs, ys = np.meshgrid(x, y)
+        # Create pyramid using manhattan distance
+        r = np.maximum(np.abs(xs), np.abs(ys))
+        # Scale from 0.5 to bottom (controlled by amplitude)
+        base = 0.5
+        valley_depth = 0.5 * amplitude
+        intensity = base - np.clip(valley_depth * (1.0 - r), 0, 1)
+        arr = np.stack([intensity] * 3, axis=-1)
+    else:
+        raise ValueError(f"Invalid patch type: {patch_type}")
 
     # Convert from float values in [0, 1] to uint8 [0, 255]
     arr_uint8 = (arr * 255).astype("uint8")
@@ -91,6 +94,30 @@ def main() -> None:
         default=1.0,
         help="Weight for 'valley' patch (default: 1.0)",
     )
+    parser.add_argument(
+        "--freq-hill-valley",
+        type=float,
+        default=1.0,
+        help="Weight for alternating 'hill-valley' patches (default: 1.0)",
+    )
+    parser.add_argument(
+        "--hill-amplitude",
+        type=float,
+        default=1.0,
+        help="Amplitude multiplier for hill patches (default: 1.0)",
+    )
+    parser.add_argument(
+        "--valley-amplitude",
+        type=float,
+        default=1.0,
+        help="Amplitude multiplier for valley patches (default: 1.0)",
+    )
+    parser.add_argument(
+        "--rough-amplitude",
+        type=float,
+        default=1.0,
+        help="Base level multiplier for rough patches (default: 1.0)",
+    )
     # Output file.
     parser.add_argument(
         "--output",
@@ -101,8 +128,14 @@ def main() -> None:
     args = parser.parse_args()
 
     # Define patch types in specific order
-    patch_types = ["hill", "valley", "smooth", "rough"]
-    frequencies = [args.freq_hill, args.freq_valley, args.freq_smooth, args.freq_rough]
+    patch_types = ["hill-valley", "hill", "valley", "smooth", "rough"]
+    frequencies = [
+        args.freq_hill_valley,
+        args.freq_hill,
+        args.freq_valley,
+        args.freq_smooth,
+        args.freq_rough,
+    ]
 
     # Calculate number of rows for each type based on frequencies
     total_freq = sum(frequencies)
@@ -116,7 +149,14 @@ def main() -> None:
     # Generate patch images programmatically
     patch_images = {}
     for p_type in patch_types:
-        patch_images[p_type] = generate_patch_texture(p_type, args.patch_size)
+        if p_type != "hill-valley":  # Skip hill-valley as it's generated per column
+            amplitude = {
+                "hill": args.hill_amplitude,
+                "valley": args.valley_amplitude,
+                "smooth": 1.0,
+                "rough": args.rough_amplitude,
+            }[p_type]
+            patch_images[p_type] = generate_patch_texture(p_type, args.patch_size, amplitude=amplitude)
 
     # Create a new blank image for the grid
     grid_width = args.cols * args.patch_size
@@ -125,12 +165,23 @@ def main() -> None:
 
     current_row = 0
     for patch_type, num_rows in zip(patch_types, rows_per_type):
-        patch_img = patch_images[patch_type]
-        for row in range(num_rows):
-            for j in range(args.cols):
-                x = j * args.patch_size
-                y = (current_row + row) * args.patch_size
-                grid_image.paste(patch_img, (x, y))
+        if patch_type == "hill-valley":
+            # Generate hill-valley patches for each column
+            for row in range(num_rows):
+                for j in range(args.cols):
+                    x = j * args.patch_size
+                    y = (current_row + row) * args.patch_size
+                    # Use appropriate amplitude based on whether it's a hill or valley
+                    amplitude = args.hill_amplitude if j % 2 == 0 else args.valley_amplitude
+                    patch_img = generate_patch_texture(patch_type, args.patch_size, j, amplitude=amplitude)
+                    grid_image.paste(patch_img, (x, y))
+        else:
+            patch_img = patch_images[patch_type]
+            for row in range(num_rows):
+                for j in range(args.cols):
+                    x = j * args.patch_size
+                    y = (current_row + row) * args.patch_size
+                    grid_image.paste(patch_img, (x, y))
         current_row += num_rows
 
     grid_image.save(args.output)
