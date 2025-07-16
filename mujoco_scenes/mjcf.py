@@ -2,6 +2,7 @@
 
 import itertools
 import re
+from pathlib import Path
 from xml.etree import ElementTree as ET
 
 import mujoco
@@ -179,7 +180,7 @@ def validate_model(mj: mujoco.MjModel) -> None:
                 raise NotImplementedError("Cylinders of half-length>0.001 are not supported for collision.")
 
 
-def load_mjmodel(path: str | epath.Path, scene: str | None = None) -> mujoco.MjModel:
+def load_mjmodel(path: str | Path | epath.Path, scene: str | None = None) -> mujoco.MjModel:
     elem = ET.fromstring(epath.Path(path).read_text())
     meshdir = _get_meshdir(elem)
     assets = _find_assets(elem, epath.Path(path), meshdir)
