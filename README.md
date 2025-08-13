@@ -20,5 +20,5 @@ mujoco.viewer.launch(model)
 
 # `dev-bart` command to create `patch_light`
 ```bash
-python generate.py --freq-hill 0 --freq-valley 0 --patch-size 64  --rows 5 --freq-hill-valley 2 --freq-rough 2  --rough-amplitude 0.5 --hill-amplitude 0.3 --valley-amplitude 0.3 --output templates/assets/patch_light.png
+python generate.py --freq-hill 0 --freq-valley 0 --patch-size 64  --rows 5 --freq-hill-valley 2 --freq-rough 2  --rough-amplitude 0.5 --hill-amplitude 0.5 --valley-amplitude 0.5 --output templates/assets/patch_light.png
 ```
