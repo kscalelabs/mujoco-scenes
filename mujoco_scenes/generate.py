@@ -11,7 +11,7 @@ def generate_patch_texture(patch_type: str, size: int, col_idx: int = 0, amplitu
     if patch_type == "hill-valley":
         # Alternate between hill and valley based on column index
         patch_type = "hill" if col_idx % 2 == 0 else "valley"
-    
+
     if patch_type == "rough":
         # Rough: random noise.
         arr = (np.random.rand(size, size, 3) - 0.5) * 0.03 * amplitude + 0.5
