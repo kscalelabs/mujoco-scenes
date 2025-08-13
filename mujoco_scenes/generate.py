@@ -8,10 +8,10 @@ from PIL import Image
 
 
 def generate_patch_texture(patch_type: str, size: int, col_idx: int = 0, amplitude: float = 1.0) -> Image.Image:
+    if patch_type == "hill-valley":
+        patch_type = "hill" if col_idx % 2 == 0 else "valley"
+
     match patch_type:
-        case "hill-valley":
-            # Alternate between hill and valley based on column index
-            patch_type = "hill" if col_idx % 2 == 0 else "valley"
         case "rough":
             # Rough: random noise.
             arr = (np.random.rand(size, size, 3) - 0.5) * 0.03 * amplitude + 0.5
