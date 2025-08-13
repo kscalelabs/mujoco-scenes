@@ -15,9 +15,11 @@ def generate_patch_texture(patch_type: str, size: int, col_idx: int = 0, amplitu
         case "rough":
             # Rough: random noise.
             arr = (np.random.rand(size, size, 3) - 0.5) * 0.03 * amplitude + 0.5
+
         case "smooth":
             # Smooth: uniform gray texture (constant value).
             arr = np.ones((size, size, 3)) * 0.5
+
         case "hill":
             # Hill: pyramid shape that rises from 0.5 at edges to peak at center
             x = np.linspace(-1, 1, size)
@@ -30,6 +32,7 @@ def generate_patch_texture(patch_type: str, size: int, col_idx: int = 0, amplitu
             peak_offset = 0.5 * amplitude
             intensity = base + np.clip(peak_offset * (1.0 - r), 0, 1)
             arr = np.stack([intensity] * 3, axis=-1)
+
         case "valley":
             # Valley: pyramid shape that drops from 0.5 at edges to bottom at center
             x = np.linspace(-1, 1, size)
@@ -42,6 +45,7 @@ def generate_patch_texture(patch_type: str, size: int, col_idx: int = 0, amplitu
             valley_depth = 0.5 * amplitude
             intensity = base - np.clip(valley_depth * (1.0 - r), 0, 1)
             arr = np.stack([intensity] * 3, axis=-1)
+
         case _:
             raise ValueError(f"Invalid patch type: {patch_type}")
 
