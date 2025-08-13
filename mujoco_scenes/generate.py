@@ -8,42 +8,42 @@ from PIL import Image
 
 
 def generate_patch_texture(patch_type: str, size: int, col_idx: int = 0, amplitude: float = 1.0) -> Image.Image:
-    if patch_type == "hill-valley":
-        # Alternate between hill and valley based on column index
-        patch_type = "hill" if col_idx % 2 == 0 else "valley"
-
-    if patch_type == "rough":
-        # Rough: random noise.
-        arr = (np.random.rand(size, size, 3) - 0.5) * 0.03 * amplitude + 0.5
-    elif patch_type == "smooth":
-        # Smooth: uniform gray texture (constant value).
-        arr = np.ones((size, size, 3)) * 0.5
-    elif patch_type == "hill":
-        # Hill: pyramid shape that rises from 0.5 at edges to peak at center
-        x = np.linspace(-1, 1, size)
-        y = np.linspace(-1, 1, size)
-        xs, ys = np.meshgrid(x, y)
-        # Create pyramid using manhattan distance
-        r = np.maximum(np.abs(xs), np.abs(ys))
-        # Scale from 0.5 to peak (controlled by amplitude)
-        base = 0.5
-        peak_offset = 0.5 * amplitude
-        intensity = base + np.clip(peak_offset * (1.0 - r), 0, 1)
-        arr = np.stack([intensity] * 3, axis=-1)
-    elif patch_type == "valley":
-        # Valley: pyramid shape that drops from 0.5 at edges to bottom at center
-        x = np.linspace(-1, 1, size)
-        y = np.linspace(-1, 1, size)
-        xs, ys = np.meshgrid(x, y)
-        # Create pyramid using manhattan distance
-        r = np.maximum(np.abs(xs), np.abs(ys))
-        # Scale from 0.5 to bottom (controlled by amplitude)
-        base = 0.5
-        valley_depth = 0.5 * amplitude
-        intensity = base - np.clip(valley_depth * (1.0 - r), 0, 1)
-        arr = np.stack([intensity] * 3, axis=-1)
-    else:
-        raise ValueError(f"Invalid patch type: {patch_type}")
+    match patch_type:
+        case "hill-valley":
+            # Alternate between hill and valley based on column index
+            patch_type = "hill" if col_idx % 2 == 0 else "valley"
+        case "rough":
+            # Rough: random noise.
+            arr = (np.random.rand(size, size, 3) - 0.5) * 0.03 * amplitude + 0.5
+        case "smooth":
+            # Smooth: uniform gray texture (constant value).
+            arr = np.ones((size, size, 3)) * 0.5
+        case "hill":
+            # Hill: pyramid shape that rises from 0.5 at edges to peak at center
+            x = np.linspace(-1, 1, size)
+            y = np.linspace(-1, 1, size)
+            xs, ys = np.meshgrid(x, y)
+            # Create pyramid using manhattan distance
+            r = np.maximum(np.abs(xs), np.abs(ys))
+            # Scale from 0.5 to peak (controlled by amplitude)
+            base = 0.5
+            peak_offset = 0.5 * amplitude
+            intensity = base + np.clip(peak_offset * (1.0 - r), 0, 1)
+            arr = np.stack([intensity] * 3, axis=-1)
+        case "valley":
+            # Valley: pyramid shape that drops from 0.5 at edges to bottom at center
+            x = np.linspace(-1, 1, size)
+            y = np.linspace(-1, 1, size)
+            xs, ys = np.meshgrid(x, y)
+            # Create pyramid using manhattan distance
+            r = np.maximum(np.abs(xs), np.abs(ys))
+            # Scale from 0.5 to bottom (controlled by amplitude)
+            base = 0.5
+            valley_depth = 0.5 * amplitude
+            intensity = base - np.clip(valley_depth * (1.0 - r), 0, 1)
+            arr = np.stack([intensity] * 3, axis=-1)
+        case _:
+            raise ValueError(f"Invalid patch type: {patch_type}")
 
     # Convert from float values in [0, 1] to uint8 [0, 255]
     arr_uint8 = (arr * 255).astype("uint8")
