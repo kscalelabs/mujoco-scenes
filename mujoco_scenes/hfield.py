@@ -55,14 +55,14 @@ def get_sine_hfield(size: tuple[int, int], amplitude: float = 0.1, freq: float =
     x = np.linspace(0, 2 * np.pi * freq, w)
     y = np.linspace(0, 2 * np.pi * freq, h)
     X, Y = np.meshgrid(x, y)
-    
+
     # Create sine waves in both directions with phase offset
     z = np.sin(X) + np.sin(Y)
-    
+
     # Scale to desired amplitude and shift to 0-255 range
     z = (z + 2) * (255 * amplitude / 4)  # +2 shifts range from [-2,2] to [0,4]
     z = z.astype(np.uint8)
-    
+
     return PIL.Image.fromarray(z)
 
 
