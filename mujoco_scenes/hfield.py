@@ -40,11 +40,39 @@ def get_steps_hfield(size: tuple[int, int], step_size: int) -> PIL.Image.Image:
     return PIL.Image.fromarray(arr)
 
 
+def get_sine_hfield(size: tuple[int, int], amplitude: float = 0.1, freq: float = 2.0) -> PIL.Image.Image:
+    """Returns a heightfield with subtle sinusoidal waves in both x and y directions.
+
+    Args:
+        size: The size of the hfield.
+        amplitude: The amplitude of the sine waves (0-1, will be scaled to 0-255).
+        freq: The frequency of the sine waves (cycles per field).
+
+    Returns:
+        A PIL image of the hfield.
+    """
+    w, h = size
+    x = np.linspace(0, 2 * np.pi * freq, w)
+    y = np.linspace(0, 2 * np.pi * freq, h)
+    x_grid, y_grid = np.meshgrid(x, y)
+
+    # Create sine waves in both directions with phase offset
+    z = np.sin(x_grid) + np.sin(y_grid)
+
+    # Scale to desired amplitude and shift to 0-255 range
+    z = (z + 2) * (255 * amplitude / 4)  # +2 shifts range from [-2,2] to [0,4]
+    z = z.astype(np.uint8)
+
+    return PIL.Image.fromarray(z)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("mode", choices=["rough", "steps"])
+    parser.add_argument("mode", choices=["rough", "steps", "sine"])
     parser.add_argument("--size", type=int, nargs=2, default=(256, 256))
     parser.add_argument("--step-size", type=int, default=16)
+    parser.add_argument("--amplitude", type=float, default=0.1)
+    parser.add_argument("--freq", type=float, default=2.0)
     parser.add_argument("--output", type=str)
     args = parser.parse_args()
 
@@ -52,6 +80,8 @@ def main() -> None:
         img = get_rough_hfield(args.size)
     elif args.mode == "steps":
         img = get_steps_hfield(args.size, args.step_size)
+    elif args.mode == "sine":
+        img = get_sine_hfield(args.size, args.amplitude, args.freq)
     else:
         raise ValueError(f"Invalid mode: {args.mode}")
 
